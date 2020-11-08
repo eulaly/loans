@@ -14,13 +14,13 @@ def loans_available():
                 loan_name = loans[index]['name']
                 loan_amount = loans[index]['principal']
                 loan_interest = loans[index]['interest']
-                print(f'{index}  |  {loan_name} \t..\t..\t${loan_amount} @ {loan_interest}%')
+                print(f'{index}  |  {loan_name} \t ${loan_amount} @ {loan_interest}%')
             loans_available.yes = True
         else:
             loans = []
             loans_available.yes = False
         loans_available.loans = loans
-        return
+        return #loans_available.loans
 
 def add_loan():
     loans = loans_available.loans
@@ -50,42 +50,48 @@ def add_loan():
     # f.write(str(loans))
     f.write(f"loans = {str(loans)}")
     f.close()
-
     print("Loan added successully.")
     menu()
 
 def modify_loan():
     loans = loans_available.loans
-    loan_yes_no = input(f"Which loan would you like to modify? [0-{1-length(loans)}]")
-    options = enumerate(loans)
+    options = ('y', 'Y', 'yes', 'Yes')
     while True:
         try:
-            selection = int(input("Enter the number of the loan you want to modify:"))
+            selection = abs(int(input("Enter the number of the loan you want to modify:")))
+            loan = loans[selection]
         except:
             print("That's not an option")
         else:
-            try:
-                loan = loans[selection]
-            except:
-                print("That's not an option")
-            else:
-                loan = loans[selection]
-                name = loan['name']
-                principal = loan['principal']
-                interest = loan['interest']
-                print(f"You have selected {name}\nPrincipal  |  ${principal}\nInterest   |  {interest}%")
-                break
+            loan = loans[selection]
+            name = loan['name']
+            principal = loan['principal']
+            interest = loan['interest']
             break
-    print(f"\n 0 | name\n 1 | principal\n 2 | interest\n")
+
     while True:
-        try: 
-            selection = int(input(f"What would you like to modify? [0-2]"))
+        try:
+            print(f"You have selected {name}\nPrincipal  |  ${principal}\nInterest   |  {interest}%")
+            # print(f"You have selected {loan['name']}\nPrincipal  |  #{loan['principal']}\n  |  {loan['interest']%"})
+            new_name = input(f"Current name is {name}, new name is: [input * to keep]")
+            if new_name == '*': new_name = name
+            new_principal = input(f"Current principal is {principal}, new principal is: [input * to keep]")
+            if new_principal == '*': new_principal = principal
+            new_interest = input(f"Current interest is {interest}, new interest is: [input * to keep]")
+            if new_interest == '*': new_interest = interest
+            print(f"New values are {new_name}\nPrincipal  |  ${new_principal}\nInterest   |  {new_interest}%")
+            conf = input("Is this ok? [Y/N]")
+            if conf not in options:
+                redo = input("Would you like to modify the same loan again? [Y/N]")
+                if redo not in options:
+                    raise Exception
+            else:
+                break
         except:
-            print("That's not an option")
-        else:
-            try:
-
-
+            print("Ok let's try again:")
+    loan = {'name':new_name, 'principal':new_principal, 'interest':new_interest}
+    loans[selection] = loan
+    menu()
 
 def make_payment():
     from decimal import Decimal
@@ -138,13 +144,47 @@ def make_payment():
     print(f'With a payment of ${payment}\nPaid in {z} months')
     menu()
 
+def remove_loan():
+    while True:
+        loans = loans_available.loans
+        options = ('y', 'Y', 'yes', 'Yes')
+        remove_yes_no = input("Would you like to remove a loan? [Y/N]")
+        if remove_yes_no not in options:
+            break
+        while True:
+            try:
+                selection = abs(int(input("Enter the number of the loan you want to delete:")))
+                loan = loans[selection]
+            except:
+                print("That's not an option")
+            else:
+                loan = loans[selection]
+                name = loan['name']
+                principal = loan['principal']
+                interest = loan['interest']
+                break
+        while True:
+            try:
+                print(f"You have selected {name}\nPrincipal  |  ${principal}\nInterest   |  {interest}%")
+                confirmation = input("Are you sure you want to delete this loan? [Y/N]")
+                if confirmation not in options:
+                    raise Exception
+            except:
+                print("Ok.")
+                break
+            else:
+                removed_loan = loans.pop(selection)
+                print(f"{removed_loan['name']} removed.")
+                break
+    menu()
+
 def exit_app():
     print("See ya.")
     exit()
 
 def menu():
     loans_available()
-    menu_options = {1:add_loan, 2:make_payment, 3: exit_app}
+    menu_options = {1:add_loan, 2:modify_loan, 3:make_payment, 4: remove_loan, 5:exit_app}
     if loans_available.yes==False:
         menu_options[1]()
         return
